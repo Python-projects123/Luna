@@ -5,33 +5,139 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Luna</title>
   <style>
-    body {
+    :root {
+      --bg: #171717;
+      --text: #f5f5f5;
+      --muted: #d9d9d9;
+      --blob-size: 18px;
+      --blob-glow: rgba(96, 165, 250, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
       margin: 0;
+      width: 100%;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    body {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background-color: #171717;
-      color: #ffffff;
-      font-family: Arial, sans-serif;
       text-align: center;
+      position: relative;
     }
 
     h1 {
       margin: 0 0 0.5rem;
-      font-size: 2.5rem;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: 0.04em;
     }
 
     p {
       margin: 0;
-      font-size: 1.1rem;
-      color: #d9d9d9;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--muted);
+    }
+
+    .cursor-blob,
+    .cursor-blob::before {
+      position: fixed;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      z-index: 9999;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor-blob {
+      width: var(--blob-size);
+      height: var(--blob-size);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow:
+        0 0 18px 10px var(--blob-glow),
+        0 0 40px 20px rgba(255, 255, 255, 0.12);
+      mix-blend-mode: screen;
+      transition: width 0.15s ease, height 0.15s ease, opacity 0.15s ease;
+    }
+
+    .cursor-blob::before {
+      content: "";
+      inset: 28%;
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .cursor-blob.is-active {
+      width: 28px;
+      height: 28px;
+    }
+
+    @media (pointer: coarse) {
+      html, body {
+        cursor: auto;
+      }
+
+      .cursor-blob {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html, body {
+        cursor: auto;
+      }
+
+      .cursor-blob {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="cursor-blob" aria-hidden="true"></div>
+
   <h1>Luna</h1>
   <p><em>Run one of the fastest AI models just in your computer.</em></p>
+
+  <script>
+    const blob = document.querySelector('.cursor-blob');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const target = { x: pointer.x, y: pointer.y };
+
+    if (!prefersReducedMotion && blob) {
+      const moveBlob = () => {
+        pointer.x += (target.x - pointer.x) * 0.22;
+        pointer.y += (target.y - pointer.y) * 0.22;
+        blob.style.left = `${pointer.x}px`;
+        blob.style.top = `${pointer.y}px`;
+        requestAnimationFrame(moveBlob);
+      };
+
+      window.addEventListener('pointermove', (event) => {
+        target.x = event.clientX;
+        target.y = event.clientY;
+      });
+
+      window.addEventListener('pointerdown', () => blob.classList.add('is-active'));
+      window.addEventListener('pointerup', () => blob.classList.remove('is-active'));
+      window.addEventListener('pointerleave', () => blob.style.opacity = '0');
+      window.addEventListener('pointerenter', () => blob.style.opacity = '1');
+
+      blob.style.opacity = '1';
+      requestAnimationFrame(moveBlob);
+    }
+  </script>
 </body>
 </html>
