@@ -6,28 +6,38 @@
   <title>Luna</title>
   <style>
     :root {
-      --bg: #171717;
-      --text: #f5f5f5;
-      --muted: #d9d9d9;
-      --blob-size: 18px;
-      --blob-glow: rgba(96, 165, 250, 0.45);
+      --bg: #151515;
+      --text: #F4F4F4;
+      --muted: #F4F4F4;
     }
-
     * {
       box-sizing: border-box;
     }
-
     html, body {
       margin: 0;
       width: 100%;
       min-height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: Arial, sans-serif;
+      font-family: "Times New Roman", Times, serif;
+      font-style: italic;
       overflow: hidden;
-      cursor: none;
     }
-
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(96, 165, 250, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(96, 165, 250, 0.12) 1px, transparent 1px);
+      background-size: 64px 64px;
+      background-position: calc(50% + var(--grid-x, 0px)) calc(50% + var(--grid-y, 0px));
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 45%, transparent 85%);
+      mask-image: radial-gradient(circle at 50% 50%, #000 45%, transparent 85%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background-position 0.2s ease-out;
+    }
     body {
       min-height: 100vh;
       display: flex;
@@ -37,107 +47,34 @@
       text-align: center;
       position: relative;
     }
-
     h1 {
       margin: 0 0 0.5rem;
-      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      font-weight: 400;
       letter-spacing: 0.04em;
+      position: relative;
+      z-index: 1;
     }
-
     p {
       margin: 0;
-      font-size: clamp(1rem, 2vw, 1.2rem);
+      font-size: clamp(0.8rem, 1.4vw, 0.95rem);
       color: var(--muted);
-    }
-
-    .cursor-blob,
-    .cursor-blob::before {
-      position: fixed;
-      left: 0;
-      top: 0;
-      pointer-events: none;
-      z-index: 9999;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .cursor-blob {
-      width: var(--blob-size);
-      height: var(--blob-size);
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow:
-        0 0 18px 10px var(--blob-glow),
-        0 0 40px 20px rgba(255, 255, 255, 0.12);
-      mix-blend-mode: screen;
-      transition: width 0.15s ease, height 0.15s ease, opacity 0.15s ease;
-    }
-
-    .cursor-blob::before {
-      content: "";
-      inset: 28%;
-      background: rgba(0, 0, 0, 0.8);
-    }
-
-    .cursor-blob.is-active {
-      width: 28px;
-      height: 28px;
-    }
-
-    @media (pointer: coarse) {
-      html, body {
-        cursor: auto;
-      }
-
-      .cursor-blob {
-        display: none;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html, body {
-        cursor: auto;
-      }
-
-      .cursor-blob {
-        display: none;
-      }
+      position: relative;
+      z-index: 1;
     }
   </style>
 </head>
 <body>
-  <div class="cursor-blob" aria-hidden="true"></div>
-
   <h1>Luna</h1>
   <p><em>Run one of the fastest AI models just in your computer.</em></p>
-
   <script>
-    const blob = document.querySelector('.cursor-blob');
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    const target = { x: pointer.x, y: pointer.y };
-
-    if (!prefersReducedMotion && blob) {
-      const moveBlob = () => {
-        pointer.x += (target.x - pointer.x) * 0.22;
-        pointer.y += (target.y - pointer.y) * 0.22;
-        blob.style.left = `${pointer.x}px`;
-        blob.style.top = `${pointer.y}px`;
-        requestAnimationFrame(moveBlob);
-      };
-
-      window.addEventListener('pointermove', (event) => {
-        target.x = event.clientX;
-        target.y = event.clientY;
-      });
-
-      window.addEventListener('pointerdown', () => blob.classList.add('is-active'));
-      window.addEventListener('pointerup', () => blob.classList.remove('is-active'));
-      window.addEventListener('pointerleave', () => blob.style.opacity = '0');
-      window.addEventListener('pointerenter', () => blob.style.opacity = '1');
-
-      blob.style.opacity = '1';
-      requestAnimationFrame(moveBlob);
-    }
+    const root = document.documentElement;
+    window.addEventListener('pointermove', (event) => {
+      const x = (event.clientX / window.innerWidth - 0.5) * 40;
+      const y = (event.clientY / window.innerHeight - 0.5) * 40;
+      root.style.setProperty('--grid-x', `${x}px`);
+      root.style.setProperty('--grid-y', `${y}px`);
+    });
   </script>
 </body>
 </html>
